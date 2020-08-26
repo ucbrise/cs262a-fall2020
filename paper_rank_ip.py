@@ -13,8 +13,6 @@ import random
 
 
 PAPERS = [
-    'The UNIX Time-Sharing System',
-    'A History and Evaluation of System R',
     'A Fast File System for UNIX',
     'Analysis and Evolution of Journaling File Systems',
     'End to End Arguments in System Design e2e arguments',
@@ -98,15 +96,15 @@ def main():
             for j in range(len(students)):
                 edges[(i, j)] = pulp.LpVariable(f'p{i}s{j}', cat=pulp.LpBinary)
 
-        # Every student must have exactly one paper.
+        # Every student must have at most one paper.
         for j in range(len(students)):
-            problem += (sum(edges[i, j] for i in range(len(PAPERS))) == 1,
-                        f'student_{j}_exactly_one_paper')
+            problem += (sum(edges[i, j] for i in range(len(PAPERS))) <= 1,
+                        f'student_{j}_at_most_one_paper')
 
-        # Every paper must have at least one student.
+        # Every paper must have at exactly one student.
         for i in range(len(PAPERS)):
-            problem += (sum(edges[i, j] for j in range(len(students))) >= 1,
-                        f'paper_{i}_at_least_one_student')
+            problem += (sum(edges[i, j] for j in range(len(students))) == 1,
+                        f'paper_{i}_exactly_one_student')
 
         # We want to minimize the total score of the assignment.
         problem += sum(score(PAPERS[i], students[j]) * edges[(i, j)]
@@ -121,7 +119,8 @@ def main():
                 if edges[(i, j)].varValue == 1:
                     p = PAPERS[i]
                     s = students[j]
-                    print(f'{p}: {s.name} ({s.email}) [{score(p, s)}]')
+                    # print(f'{p}: {s.name} ({s.email}) [{score(p, s)}]')
+                    print(f"'{p}','{s.name}','{s.email}'")
 
 
 if __name__ == '__main__':
